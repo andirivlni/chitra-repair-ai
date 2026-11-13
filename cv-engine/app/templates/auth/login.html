@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Masuk - EZ Template{% endblock %}
+
+{% block content %}
+<main class="login-shell">
+    <section class="login-brand-panel" aria-label="Afi Template introduction">
+        <div class="login-brand-mark"><i data-lucide="sparkles" class="w-7 h-7"></i></div>
+        <div class="login-brand-copy">
+            <p class="login-kicker">EZ Template</p>
+            <h1>Build smarter.<br><span>Ship faster.</span> ✦</h1>
+            <p class="login-description">Satu workspace untuk Computer Vision, RAG, dan Machine Learning yang siap dikembangkan menjadi produk nyata.</p>
+        </div>
+        <p class="login-brand-footer"><a href="https://www.instagram.com/Khadafi_annas/" target="_blank" rel="noopener noreferrer">Instagram: @Khadafi_annas</a></p>
+    </section>
+
+    <section class="login-form-panel">
+        <div class="login-form-wrap">
+            <div class="login-mobile-brand">
+                <span class="login-mobile-icon"><i data-lucide="cpu" class="w-5 h-5"></i></span>
+                <span>EZ<span> Template</span></span>
+            </div>
+
+            <h2>Selamat datang kembali!</h2>
+
+            {% if info %}
+            <div class="login-alert login-alert-info" role="status">
+                <i data-lucide="info" class="w-4 h-4"></i>
+                <span>{{ info }}</span>
+            </div>
+            {% endif %}
+
+            {% if error %}
+            <div class="login-alert login-alert-error" role="alert">
+                <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <form action="/login" method="POST" class="login-form">
+                <div class="login-field">
+                    <label for="email-input">Alamat email</label>
+                    <div class="login-input-wrap">
+                        <i data-lucide="mail" class="w-4 h-4" aria-hidden="true"></i>
+                        <input type="email" id="email-input" name="email" value="{{ email if email else '' }}" required autocomplete="email" placeholder="nama@email.com">
+                    </div>
+                </div>
+
+                <div class="login-field">
+                    <label for="password-input">Kata sandi</label>
+                    <div class="login-input-wrap">
+                        <i data-lucide="lock-keyhole" class="w-4 h-4" aria-hidden="true"></i>
+                        <input type="password" id="password-input" name="password" required autocomplete="current-password" placeholder="Masukkan kata sandi">
+                        <button type="button" class="login-password-toggle" aria-label="Tampilkan kata sandi" onclick="const input=document.getElementById('password-input'); const visible=input.type==='text'; input.type=visible?'password':'text'; this.setAttribute('aria-label',visible?'Tampilkan kata sandi':'Sembunyikan kata sandi'); this.innerHTML=visible?'<i data-lucide=&quot;eye&quot; class=&quot;w-4 h-4&quot;></i>':'<i data-lucide=&quot;eye-off&quot; class=&quot;w-4 h-4&quot;></i>'; lucide.createIcons();">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-submit">
+                    Masuk ke Dashboard
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+            </form>
+
+        </div>
+    </section>
+</main>
+{% endblock %}
