@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -------------------------------------------------------------
+// Better Auth Core Models
+// -------------------------------------------------------------
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  role          String    @default("viewer") // "admin" | "supervisor" | "viewer"
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// -------------------------------------------------------------
+// Workshop CV & AI Monitoring Models
+// -------------------------------------------------------------
+model Camera {
+  id          String           @id @default(cuid())
+  code        String           @unique // e.g. "cctv-01"
+  name        String // "CCTV 01"
+  location    String // "Repair Workshop"
+  status      String           @default("online") // "online" | "offline"
+  streamType  String           @default("simulation") // "simulation" | "rtsp_webrtc" | "hls"
+  streamUrl   String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  zones       Zone[]
+  detections  DetectionEvent[]
+}
+
+model Zone {
+  id         String           @id @default(cuid())
+  code       String // "Z1"
+  name       String // "Repair Bay A"
+  color      String // "#eab308"
+  pointsJson String // JSON array of {x, y} coordinates
+  cameraId   String
+  camera     Camera           @relation(fields: [cameraId], references: [id], onDelete: Cascade)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  detections DetectionEvent[]
+  durations  ShiftDuration[]
+}
+
+model DetectionEvent {
+  id          String   @id @default(cuid())
+  cameraId    String
+  camera      Camera   @relation(fields: [cameraId], references: [id], onDelete: Cascade)
+  zoneId      String
+  zone        Zone     @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  label       String // "Repairing" | "Not Repairing"
+  confidence  Float
+  trackId     String? // e.g. "T-01"
+  durationSec Int?
+  timestamp   DateTime @default(now())
+}
+
+model ShiftDuration {
+  id                  String   @id @default(cuid())
+  zoneId              String
+  zone                Zone     @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  shiftName           String // "Shift 1" | "Shift 2" | "Shift 3"
+  date                String // "YYYY-MM-DD"
+  repairingMinutes    Int      @default(0)
+  notRepairingMinutes Int      @default(0)
+  updatedAt           DateTime @updatedAt
+
+  @@unique([zoneId, shiftName, date])
+}
+
+model AIModelConfig {
+  id                  String   @id @default(cuid())
+  name                String // "Repair Activity v1.0"
+  version             String // "1.0.0"
+  source              String   @default("Afi Vision")
+  classes             String   @default("Repairing,Not Repairing")
+  confidenceThreshold Float    @default(0.70)
+  active              Boolean  @default(false)
+  workflowName        String?
+  endpointUrl         String?  @default("/api/events")
+  fileName            String?
+  uploadedAt          DateTime @default(now())
+}
